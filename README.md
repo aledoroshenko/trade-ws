@@ -2,7 +2,7 @@
 
 Backend part for [Trade](https://github.com/aledoroshenko/trade). NestJS server with Websockets (with `ws`) which listens to `events` to subscribe and unsubscribe for feed of mock assets prices. Server publish prices with the help of `Obserbable`.
 
-### Subscribe (with native Websockets):
+### Subscribe (with native Websockets)
 
 ```javascript
 this.websocket.send(
@@ -13,7 +13,7 @@ this.websocket.send(
 );
 ```
 
-### Unsubscribe:
+### Unsubscribe
 
 ```javascript
 this.websocket.send(
