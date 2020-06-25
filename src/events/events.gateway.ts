@@ -2,34 +2,38 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsResponse,
 } from '@nestjs/websockets';
-import { from, interval, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { interval} from 'rxjs';
 import { Server } from 'ws';
-
-
-type MockPrice = {
-  isin: string,
-  price: number,
-  bid: number,
-  ask: number
-}
 
 @WebSocketGateway(8080)
 export class EventsGateway {
   @WebSocketServer()
   server: Server;
 
-  @SubscribeMessage('events')
-  onEvent(client: any, data: any): Observable<WsResponse<MockPrice>> {
-    return interval(1000).pipe(map(item => {
-      console.log("fired")
+  subscription = {};
 
-      return ({
-        event: 'events',
-        data: { 'isin': 'DE000BASF111', 'price': 240.32, 'bid': 240.31, 'ask': 240.33 },
-      });
-    }));
+  @SubscribeMessage('events')
+  onEvent(client: any, data: any):any {
+    if(data.type === 'subscribe') {
+      const isin = data.subscribe;
+
+      console.log(`Subscribe to ${isin}`)
+      this.subscription[isin] = interval(1000).subscribe((number) => {
+        client.send(JSON.stringify({
+          isin,
+          price: 100 + number,
+          bid: 100,
+          ask: 100
+        }));
+      })
+    }
+
+    if (data.type === 'unsubscribe') {
+      const isin = data.unsubscribe;
+
+      console.log(`Unsubscribe from ${isin}`)
+      this.subscription[isin].unsubscribe();
+    }
   }
 }
